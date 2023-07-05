@@ -3,6 +3,7 @@ from player import Player
 from enemy import Enemy
 from nivel import *
 from constantes import *
+from background import Background
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Shooter')
@@ -25,48 +26,73 @@ image_dict = {
 }
 
 # backgroup configuration
-pine1_img = pygame.image.load('img/Background/pine1.png').convert_alpha()
-pine2_img = pygame.image.load('img/Background/pine2.png').convert_alpha()
-mountain_img = pygame.image.load('img/Background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('img/Background/sky_cloud.png').convert_alpha()
+background_image = "img/background/fondo_0.png"
+background = Background(background_image)
 bg_scroll = 0
+#sonidos 
+jump_fx = pygame.mixer.Sound('audio/jump.wav')
+jump_fx.set_volume(0.02)
+shot_fx = pygame.mixer.Sound('audio/shot.wav')
+shot_fx.set_volume(0.02)
+grenade_fx = pygame.mixer.Sound('audio/grenade.wav')
+grenade_fx.set_volume(0.02)
 
-def draw_bg():
-	screen.fill(BG)
-	width = sky_img.get_width()
-        
-	for x in range(5):
-		screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
-		screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
-		screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
-		screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height()))
+#img
+#bullet
+bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+#grenade
+grenade_img = pygame.image.load('img/icons/grenade.png').convert_alpha()
 
 
-level = 2
+
+
+
+enemy_group = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
+grenade_group = pygame.sprite.Group()
+explosion_group = pygame.sprite.Group()
+item_box_group = pygame.sprite.Group()
+decoration_group = pygame.sprite.Group()
+water_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
+
+
+
+
+level = 1
 world = World()
 world.load_level_data(level)
 player_1, enemi_1 = world.process_data(image_dict)
-
+enemy_group.add(enemi_1)
 
 dx = 0
 dy = 0
 run = True
-while run:
+while run: 
     for event in pygame.event.get():
         # Quit game
         if event.type == pygame.QUIT:
             run = False
         elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-            player_1.handle_key_events(event)
+            player_1.handle_key_events(event,bullet_group,shot_fx)
 
-    draw_bg()
-    enemi_1.update(bg_scroll, player_1)  # Actualizar al enemigo antes de dibujarlo
+    background.draw(player_1)
+    enemi_1.update(bg_scroll, player_1,bullet_group,shot_fx)  # Actualizar al enemigo antes de dibujarlo
     player_1.update()
     world.check_collision(player_1)
-
-    player_1.draw(screen)
+    world.check_collision(enemi_1)
+    bullet_group.update(world, player_1, enemy_group, bullet_group,)  # Actualiza las balas con los argumentos requeridos
+    bullet_group.draw(screen) 
+    player_1.draw(screen) 
     enemi_1.draw(screen)  # Dibujar al enemigo después de actualizarlo
-    world.draw(screen)
-    pygame.display.flip()
 
+
+
+    # Obtener la posición actual del fondo
+    bg_scroll = background.get_movement()
+    # Dibujar las plataformas
+    world.draw(screen,  player_1)
+
+    pygame.display.flip()
+    print("se mueve el jugador a ", player_1.vel_x)
     clock.tick(FPS)

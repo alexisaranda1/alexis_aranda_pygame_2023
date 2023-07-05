@@ -1,8 +1,6 @@
-from player import *
+import pygame
 from constantes import *
-from auxiliar import Auxiliar
-import math
-from character import Character
+
 
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, x, y, direction, bullet_img):
@@ -12,18 +10,19 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = (x, y)
 		self.direction = direction
-	def update(self, world,player, enemy_group, bullet_group, screen_scroll):
-		#move bullet
-		self.rect.x += (self.direction * self.speed) + screen_scroll
-		#check if bullet has gone off screen
+
+	def update(self, world, player, enemy_group, bullet_group):
+		# move bullet
+		self.rect.x += (self.direction * self.speed) 
+		# check if bullet has gone off screen
 		if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
 			self.kill()
-		#check for collision with level
-		for tile in world.obstacle_list:
-			if tile[1].colliderect(self.rect):
+		# check for collision with level
+		for platform in world.obstacle_list:
+			if platform.rect.colliderect(self.rect):
 				self.kill()
 
-		#check collision with characters
+		# check collision with characters
 		if pygame.sprite.spritecollide(player, bullet_group, False):
 			if player.alive:
 				player.health -= 5
@@ -34,6 +33,11 @@ class Bullet(pygame.sprite.Sprite):
 					enemy.health -= 25
 					self.kill()
 
+	def draw(self, scren):
+		scren.blit(self.image, self.rect)
+	
+
+	
 class Grenade(pygame.sprite.Sprite):
 	def __init__(self, x, y, direction,grenade_img):
 		pygame.sprite.Sprite.__init__(self)

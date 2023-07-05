@@ -4,7 +4,7 @@ from enemy import Enemy
 from bullet import *
 import pygame
 import csv
-
+from plataforma import Platform
 
 # La clase `ScreenFade` representa un efecto de desvanecimiento de la pantalla en un juego,
 #  lo que
@@ -146,7 +146,6 @@ class World():
         for row in range(ROWS):
             r = [-1] * COLS
             self.world_data.append(r)
-
         # Load level data and create world
         with open(f'level{level}_data.csv', newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
@@ -162,13 +161,9 @@ class World():
         for y, row in enumerate(self.world_data):
             for x, tile in enumerate(row):
                 if tile >= 0:
-                    img = self.img_list[tile]
-                    img_rect = img.get_rect()
-                    img_rect.x = x * TILE_SIZE
-                    img_rect.y = y * TILE_SIZE
-                    tile_data = (img, img_rect)
                     if tile >= 0 and tile <= 8:
-                        self.obstacle_list.append(tile_data)
+                        img = self.img_list[tile]
+                        self.obstacle_list.append(Platform(x * TILE_SIZE, y * TILE_SIZE, img))
                     # elif tile >= 9 and tile <= 10:
                     #     water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
                     #     water_group.add(water)
@@ -177,11 +172,11 @@ class World():
                     #         img, x * TILE_SIZE, y * TILE_SIZE)
                     #     decoration_group.add(decoration)
                     elif tile == 15:
-                        player = Player(
-                            x=23, y=100, speed=5, ammo=100, grenades=4, imge_dict=image_dict["image_dict_playe"])
+                       player = Player( x * TILE_SIZE, y * TILE_SIZE, speed=5, ammo=100, grenades=4, imge_dict=image_dict["image_dict_playe"])
+
                         # health_bar = HealthBar(10, 10, player.health, player.health, animation_list)
                     elif tile == 16:
-                        enemy = Enemy(x=100, y=300, speed=5,
+                        enemy = Enemy( x * TILE_SIZE, y * TILE_SIZE, speed=5,
                                       imge_dict=image_dict["image_dict_enemi"])
 
                     # elif tile == 17:
@@ -202,18 +197,92 @@ class World():
         return player, enemy
     
     def check_collision(self, character):
-        for tile in self.obstacle_list:
-            if tile[1].colliderect(character.rect):
+        collision_threshold = 0  # Umbral de colisión para evitar errores de colisión falsos
+
+        character.rect.x += character.vel_x
+        for platform in self.obstacle_list:
+            if platform.rect.colliderect(character.rect):
                 if character.vel_x > 0:
-                    character.rect.x = tile[1].left - character.rect.width
+                    character.rect.right = platform.rect.left - collision_threshold
                 elif character.vel_x < 0:
-                    character.rect.x = tile[1].right
+                    character.rect.left = platform.rect.right + collision_threshold
+
+        character.rect.y += character.vel_y
+        for platform in self.obstacle_list:
+            if platform.rect.colliderect(character.rect):
                 if character.vel_y > 0:
-                    character.rect.y = tile[1].top - character.rect.height
+                    character.rect.bottom = platform.rect.top - collision_threshold
+                    character.in_air = False
                 elif character.vel_y < 0:
-                    character.rect.y = tile[1].bottom
+                    character.rect.top = platform.rect.bottom + collision_threshold
+                    character.vel_y = 0
+
+        character.rect.x = round(character.rect.x)
+        character.rect.y = round(character.rect.y)
+
+
+
+    def draw(self, screen,displacement):
+        for platform in self.obstacle_list:
+            platform.update(screen,displacement)
+
+
+
+
+
+''' 
+class Level:
+    def __init__(self):
+        self.obstacle_list = []
+
+    def process_data(self, image_dict):
+        self.level_length = len(self.world_data[0])
+        player = None
+        enemy = None
+
+        for y, row in enumerate(self.world_data):
+            for x, tile in enumerate(row):
+                if tile >= 0:
+                    img = self.img_list[tile]
+                    img_rect = img.get_rect()
+                    img_rect.x = x * TILE_SIZE
+                    img_rect.y = y * TILE_SIZE
+                    tile_data = (img, img_rect)
+                    if tile >= 0 and tile <= 8:
+                        self.obstacle_list.append(Platform(x * TILE_SIZE, y * TILE_SIZE, img))
+                    elif tile == 15:
+                        player = Player(x * TILE_SIZE, y * TILE_SIZE, speed=5, ammo=100, grenades=4,
+                                        image_dict=image_dict["image_dict_player"])
+                    elif tile == 16:
+                        enemy = Enemy(x * TILE_SIZE, y * TILE_SIZE, speed=5, image_dict=image_dict["image_dict_enemy"])
+
+        return player, enemy
+
+    def check_collision(self, character):
+        collision_threshold = 0  # Umbral de colisión para evitar errores de colisión falsos
+
+        character.rect.x += character.vel_x
+        for platform in self.obstacle_list:
+            if platform.rect.colliderect(character.rect):
+                if character.vel_x > 0:
+                    character.rect.right = platform.rect.left - collision_threshold
+                elif character.vel_x < 0:
+                    character.rect.left = platform.rect.right + collision_threshold
+
+        character.rect.y += character.vel_y
+        for platform in self.obstacle_list:
+            if platform.rect.colliderect(character.rect):
+                if character.vel_y > 0:
+                    character.rect.bottom = platform.rect.top - collision_threshold
+                    character.in_air = False
+                elif character.vel_y < 0:
+                    character.rect.top = platform.rect.bottom + collision_threshold
+                    character.vel_y = 0
+
+        character.rect.x = round(character.rect.x)
+        character.rect.y = round(character.rect.y)
 
     def draw(self, screen):
-        for tile in self.obstacle_list:
-                # tile[1][0] += screen_scroll
-            screen.blit(tile[0], tile[1])
+        for platform in self.obstacle_list:
+            platform.draw(screen)
+'''

@@ -1,7 +1,10 @@
 SCREEN_WIDTH =1000 # ancho
 SCREEN_HEIGHT =650 # alto
 
+WIDTH = 64  # Ancho del personaje
+HEIGHT = 64  # Alto del personaje
 
+SPEED_FACTOR = 0.01
 FPS = 60
 #define game variables
 GRAVITY = 0.75 # Gravedad

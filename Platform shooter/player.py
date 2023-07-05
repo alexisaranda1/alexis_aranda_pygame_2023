@@ -1,8 +1,7 @@
 import pygame
 from auxiliar import Auxiliar
-from bullet import Bullet
 from character import Character
-
+from constantes import *
 class Player(Character): # jugador
     def __init__(self, x, y, speed, ammo, grenades,imge_dict):
         super().__init__(x, y, speed)
@@ -34,81 +33,97 @@ class Player(Character): # jugador
         self.in_air = False  # en_aire
         self.flip = False  # voltear
     def update(self):
-        super().update()  # Llama al método update() de la clase Character
-        self.jum()
-        self.move_left()
-        self.move_right()
+        super().update()
 
+        self.vel_x = 0  # Reiniciar la velocidad horizontal
+
+        if self.moving_left:
+            self.move_left()
+        elif self.moving_right:
+            self.move_right()
+
+        self.jum()
         # actualizar enfriamiento
-        self.rect.y += self.vel_y
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
         
-    def shoot(self,bullet_group, shot_fx):
-        """
-        La función de disparo comprueba si el jugador puede disparar, crea un objeto de bala, reduce la
-        munición y reproduce un efecto de sonido.
-        """
-        if self.shoot_cooldown == 0 and self.ammo > 0:
-            self.shoot_cooldown = 20
-            bullet = Bullet(self.rect.centerx + (0.75 * self.rect.size[0] * self.direction), self.rect.centery,
-                            self.direction)
-            bullet_group.add(bullet)
-            # reducir munición
-            self.ammo -= 1
-            shot_fx.play()
-
     def jum(self):
         if self.jump  and not self.in_air:
             print("si salte")
             self.frame_index = 0
-            self.animation = self.jum_reght
             self.vel_y = -11
             self.jump = False
             self.in_air = True
         else:
             self.in_air = False
 
+
     def move_left(self):
         if self.moving_left:
             self.frame_index = 0
-            self.animation = self.run_left
-            self.direction = -1  
+            self.direction = -1
             self.rect.x -= self.speed
-    def move_right(self):
-        if self.moving_right:
-            self.frame_index = 0
-            self.animation = self.run_reght
-            self.direction = 1 
-            self.rect.x += self.speed
-    def handle_key_events(self,event):
+            self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
 
+    def move_right(self):
+        new_position_x = self.rect.x + self.speed
+        right_limit = SCREEN_WIDTH * 3/4
+
+        if self.moving_right:
+            if new_position_x + self.rect.width <= right_limit:
+                self.frame_index = 0
+                self.direction = 1
+                self.rect.x = new_position_x
+                self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
+            else:
+                self.rect.x = right_limit - self.rect.width
+        else:
+            self.rect.x = right_limit - self.rect.width
+
+    def handle_key_events(self, event,bullet_group,shot_fx):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 print("left")
                 self.moving_left = True
+                self.update_action(3)  # Actualizar la acción a "Correr hacia la izquierda"
             elif event.key == pygame.K_d:
                 print("right")
                 self.moving_right = True
-            elif event.key == pygame.K_SPACE:  
-                #self.shoot = True
-                pass
+                self.update_action(2)  # Actualizar la acción a "Correr hacia la derecha"
+            elif event.key == pygame.K_SPACE:
+                print("dispa")
+                self.shoot(bullet_group, shot_fx) 
             elif event.key == pygame.K_q:
                 self.grenade = True
             elif event.key == pygame.K_w and self.alive:
                 print("salto")
                 self.jump = True
+                self.update_action(4)  # Actualizar la acción a "Saltar"
 
         if event.type == pygame.KEYUP:
-            self.animation = self.idle_reght
             if event.key == pygame.K_a:
                 self.moving_left = False
-            if event.key == pygame.K_d:
+                if not self.moving_right:
+                    self.update_action(0)  # Actualizar la acción a "Quieto"
+            elif event.key == pygame.K_d:
                 self.moving_right = False
-            if event.key == pygame.K_SPACE:
+                if not self.moving_left:
+                    self.update_action(0)  # Actualizar la acción a "Quieto"
+            elif event.key == pygame.K_SPACE:
                 #self.shoot = False
                 pass
-            if event.key == pygame.K_q:
+            elif event.key == pygame.K_q:
                 self.grenade = False
                 self.grenade_thrown = False
-                
+            elif event.key == pygame.K_w and self.alive:
+                self.jump = False
+                self.update_action(0)  # Actualizar la acción a "Quieto"
+        self.update_velocity()
+
+    def update_velocity(self):
+        if self.moving_left:
+            self.vel_x = -self.speed
+        elif self.moving_right:
+            self.vel_x = self.speed
+        else:
+            self.vel_x = 0

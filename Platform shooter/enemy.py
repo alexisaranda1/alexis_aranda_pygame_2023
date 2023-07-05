@@ -26,7 +26,8 @@ class Enemy(Character):
         self.height = self.image.get_height()  # alto
         self.direction = 1  # O cualquier otro valor inicial que desees
         self.action = 0  # 0: idle, 1: run
-
+        self.ammo = 5000  # Agrega el atributo ammo específico de Enemy
+        self.max_ammo = 5000
 
 
         self.move_counter = 0  # contador_movimiento
@@ -35,31 +36,32 @@ class Enemy(Character):
         self.idling_counter = 0  # contador_inactividad
 
 
-    def update(self,screen_scroll,player):
+    def update(self,screen_scroll,player, bullet_group, shot_fx):
         super().update()  # Llama al método update() de la clase Character
-        #self.ai(player)  # inteligencia_artificial
+        self.ai(player,bullet_group,shot_fx)  # inteligencia_artificial
         # desplazar
         self.rect.x += screen_scroll
-
-    def ai(self, player):
+    def move(self, direction):
+        if direction == "left":
+            self.x -= self.speed
+        elif direction == "right":
+            self.x += self.speed
+    def ai(self, player, bullet_group, shot_fx):
         if self.alive and player.alive:
             if not self.idling and random.randint(1, 200) == 1:
                 self.update_action(0)  # 0: idle
                 self.idling = True
                 self.idling_counter = 50
-            # Verificar si la IA está cerca del jugador
+
             if self.vision.colliderect(player.rect):
-                # Detenerse y mirar al jugador
                 self.update_action(0)  # 0: idle
-                # Disparar
-                self.shoot()
+                self.shoot(bullet_group, shot_fx)  # Llamada al método shoot() con los argumentos requeridos
             else:
                 if not self.idling:
                     direction = "right" if self.direction == 1 else "left"
                     self.move(direction)
                     self.update_action(1)  # 1: run
                     self.move_counter += 1
-                    # Actualizar visión de la IA mientras el enemigo se mueve
                     self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
 
                     if self.move_counter > TILE_SIZE:
@@ -69,6 +71,7 @@ class Enemy(Character):
                     self.idling_counter -= 1
                     if self.idling_counter <= 0:
                         self.idling = False
+
 
 
 

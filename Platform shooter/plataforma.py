@@ -1,25 +1,39 @@
-import pygame
-from constantes import *
-from auxiliar import Auxiliar
+from constantes import SPEED_FACTOR
+# class Platform:
+#     def __init__(self, x, y, image):
+#         self.image = image
+#         self.rect = self.image.get_rect()
+#         self.initial_position_x = x
+#         self.rect.x = x
+#         self.rect.y = y
+
+#     def update(self, screen, background_position):
+#         self.move(background_position)
+#         self.draw(screen)
+
+#     def move(self, background_position):
+#         displacement = background_position - self.initial_position_x
+#         self.rect.x = self.initial_position_x + displacement * SPEED_FACTOR
+
+#     def draw(self, screen):
+#         screen.blit(self.image, self.rect)
 
 
-class Plataform:
-    def __init__(self, x, y,width, height,  type=1):
-
-        self.image_list= Auxiliar.getSurfaceFromSeparateFiles("images/tileset/forest/Tiles/{0}.png",1,18,flip=False,w=width,h=height)
-        
-        self.image = self.image_list[type]
+class Platform:
+    def __init__(self, x, y, image):
+        self.image = image
         self.rect = self.image.get_rect()
+        self.initial_position_x = x
         self.rect.x = x
         self.rect.y = y
-        self.collition_rect = pygame.Rect(self.rect)
-        self.ground_collition_rect = pygame.Rect(self.rect)
-        self.ground_collition_rect.height = GROUND_COLLIDE_H
 
-    def draw(self,screen):
-        screen.blit(self.image,self.rect)
-        if(DEBUG):
-            pygame.draw.rect(screen,color=(255,0 ,0),rect=self.collition_rect)
-            pygame.draw.rect(screen,color=(255,255,0),rect=self.ground_collition_rect)
-        
-        
+    def update(self, screen, player):
+        self.move(player)
+        self.draw(screen)
+
+    def move(self, player):
+        displacement = player.rect.x 
+        self.rect.x = self.initial_position_x - displacement * 0.8
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
