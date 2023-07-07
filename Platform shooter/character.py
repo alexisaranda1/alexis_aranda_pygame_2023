@@ -67,10 +67,6 @@ class Character(pygame.sprite.Sprite): # personaje
         self.update_animation()
         self.check_alive()
         self.apply_gravity()
-        self.rect.x += self.vel_x
-        self.rect.y += self.vel_y
-        self.x = self.rect.x
-        self.y = self.rect.y
 
     def draw(self, screen):
         self.image = self.animation[self.frame_index]
@@ -82,16 +78,13 @@ class Character(pygame.sprite.Sprite): # personaje
     def apply_gravity(self):
         if self.vel_y < 10:
             self.vel_y += GRAVITY
-
- 
-
+            
     def check_alive(self):
         if self.health <= 0:
             self.health = 0
             self.speed = 0
             self.alive = False
             self.update_action(3)
-
     def shoot(self, bullet_group, shot_fx):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
@@ -100,3 +93,15 @@ class Character(pygame.sprite.Sprite): # personaje
             bullet_group.add(bullet)
             self.ammo -= 1
             shot_fx.play()
+
+
+    # def shoot(self, bullet_group, shot_fx):
+
+    #     if self.shoot_cooldown == 0 and self.ammo > 0:
+    #         print("diparo el enemigo")
+    #         self.shoot_cooldown = 20
+    #         bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+    #         bullet = Bullet(self.rect.centerx + (0.75 * self.rect.size[0] * self.direction), self.rect.centery, self.direction, bullet_img)
+    #         bullet_group.add(bullet)
+    #         self.ammo -= 1
+    #         shot_fx.play()

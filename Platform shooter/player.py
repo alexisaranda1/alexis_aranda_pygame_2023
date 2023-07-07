@@ -5,7 +5,6 @@ from constantes import *
 class Player(Character): # jugador
     def __init__(self, x, y, speed, ammo, grenades,imge_dict):
         super().__init__(x, y, speed)
-
         self.idle_reght= Auxiliar.getSurfaceFromSeparateFiles(imge_dict["idle"], 1, 4,False)
         self.idle_left = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["idle"], 1, 4,True) 
         self.run_reght= Auxiliar.getSurfaceFromSeparateFiles(imge_dict["run"], 1, 5)
@@ -32,21 +31,19 @@ class Player(Character): # jugador
         self.jump = False  # saltar
         self.in_air = False  # en_aire
         self.flip = False  # voltear
+        
     def update(self):
         super().update()
-
-        self.vel_x = 0  # Reiniciar la velocidad horizontal
-
+        if not self.moving_left and not self.moving_right:
+            self.vel_x = 0  # Mantener la velocidad horizontal actual si no hay acciones de movimiento
         if self.moving_left:
             self.move_left()
         elif self.moving_right:
             self.move_right()
-
         self.jum()
-        # actualizar enfriamiento
+        # Actualizar enfriamiento
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
-        
     def jum(self):
         if self.jump  and not self.in_air:
             print("si salte")
@@ -56,31 +53,42 @@ class Player(Character): # jugador
             self.in_air = True
         else:
             self.in_air = False
-
-
     def move_left(self):
         if self.moving_left:
+            self.vel_x = -self.speed
             self.frame_index = 0
             self.direction = -1
-            self.rect.x -= self.speed
-            self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
+            self.x -= self.speed
+            self.rect.x = self.x
 
     def move_right(self):
-        new_position_x = self.rect.x + self.speed
-        right_limit = SCREEN_WIDTH * 3/4
-
         if self.moving_right:
-            if new_position_x + self.rect.width <= right_limit:
-                self.frame_index = 0
-                self.direction = 1
-                self.rect.x = new_position_x
-                self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
-            else:
-                self.rect.x = right_limit - self.rect.width
-        else:
-            self.rect.x = right_limit - self.rect.width
+            self.vel_x = self.speed
+            self.frame_index = 0
+            self.direction = 1
+            self.x += self.speed
+            self.rect.x = self.x
+
+
+
+    # def move_left(self):
+    #     if self.moving_left:
+    #         self.frame_index = 0
+    #         self.direction = -1
+    #         self.rect.x -= self.speed
+    #         self.x -= self.speed
+    #         self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
+
+    # def move_right(self):
+    #     if self.moving_right:
+    #         self.frame_index = 0
+    #         self.direction = 1
+    #         self.rect.x += self.speed
+    #         self.x += self.speed
+    #         self.rect.y = self.y  # Actualizar la coordenada y del rectángulo
 
     def handle_key_events(self, event,bullet_group,shot_fx):
+       
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 print("left")
@@ -118,12 +126,13 @@ class Player(Character): # jugador
             elif event.key == pygame.K_w and self.alive:
                 self.jump = False
                 self.update_action(0)  # Actualizar la acción a "Quieto"
-        self.update_velocity()
+    def update_position(self, screen_scroll):
+        self.rect.x += screen_scroll
+        self.x += screen_scroll
 
-    def update_velocity(self):
-        if self.moving_left:
-            self.vel_x = -self.speed
-        elif self.moving_right:
-            self.vel_x = self.speed
-        else:
-            self.vel_x = 0
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+
+    

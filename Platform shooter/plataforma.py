@@ -18,7 +18,6 @@ from constantes import SPEED_FACTOR
 #     def draw(self, screen):
 #         screen.blit(self.image, self.rect)
 
-
 class Platform:
     def __init__(self, x, y, image):
         self.image = image
@@ -27,13 +26,10 @@ class Platform:
         self.rect.x = x
         self.rect.y = y
 
-    def update(self, screen, player):
-        self.move(player)
+    def update(self, screen, screen_scroll):
+        self.rect.x += screen_scroll
         self.draw(screen)
-
-    def move(self, player):
-        displacement = player.rect.x 
-        self.rect.x = self.initial_position_x - displacement * 0.8
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+

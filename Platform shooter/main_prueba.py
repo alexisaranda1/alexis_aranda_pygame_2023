@@ -43,10 +43,6 @@ bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
 #grenade
 grenade_img = pygame.image.load('img/icons/grenade.png').convert_alpha()
 
-
-
-
-
 enemy_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 grenade_group = pygame.sprite.Group()
@@ -55,9 +51,6 @@ item_box_group = pygame.sprite.Group()
 decoration_group = pygame.sprite.Group()
 water_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
-
-
-
 
 level = 1
 world = World()
@@ -68,6 +61,7 @@ enemy_group.add(enemi_1)
 dx = 0
 dy = 0
 run = True
+
 while run: 
     for event in pygame.event.get():
         # Quit game
@@ -75,10 +69,12 @@ while run:
             run = False
         elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             player_1.handle_key_events(event,bullet_group,shot_fx)
-
-    background.draw(player_1)
-    enemi_1.update(bg_scroll, player_1,bullet_group,shot_fx)  # Actualizar al enemigo antes de dibujarlo
     player_1.update()
+    screen_scroll = background.update_scroll(player_1, world)
+    background.draw(screen_scroll)
+    player_1.update_position(screen_scroll)
+    enemi_1.update(screen_scroll, player_1,bullet_group,shot_fx)  # Actualizar al enemigo antes de dibujarlo
+
     world.check_collision(player_1)
     world.check_collision(enemi_1)
     bullet_group.update(world, player_1, enemy_group, bullet_group,)  # Actualiza las balas con los argumentos requeridos
@@ -86,13 +82,15 @@ while run:
     player_1.draw(screen) 
     enemi_1.draw(screen)  # Dibujar al enemigo después de actualizarlo
 
-
-
-    # Obtener la posición actual del fondo
-    bg_scroll = background.get_movement()
     # Dibujar las plataformas
-    world.draw(screen,  player_1)
-
+    world.draw(screen,screen_scroll)
     pygame.display.flip()
-    print("se mueve el jugador a ", player_1.vel_x)
-    clock.tick(FPS)
+
+    clock.tick(30)
+
+
+
+
+
+
+

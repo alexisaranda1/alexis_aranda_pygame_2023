@@ -5,35 +5,32 @@ from character import Character
 from auxiliar import Auxiliar
 
 class Enemy(Character):
-    def __init__(self, x, y, speed, imge_dict):
-        super().__init__(x, y, speed)
-
-        self.idle_reght= Auxiliar.getSurfaceFromSeparateFiles(imge_dict["idle"], 1, 4,False)
-        self.idle_left = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["idle"], 1, 4,True) 
-        self.run_reght= Auxiliar.getSurfaceFromSeparateFiles(imge_dict["run"], 1, 5)
-        self.run_left = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["run"], 1, 5, True)
-        self.jum_reght = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["jum"], 0, 1,False ,2)
-        self.jum_left = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["jum"], 0, 1, True,2)
-        self.death_reght = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["death"], 0, 1,False ,2)
-        self.death_left = Auxiliar.getSurfaceFromSeparateFiles(imge_dict["death"], 0, 1, True,2)
-        self.frame_index = 0
-        self.animation = self.idle_reght
-        self.max_health = self.health  # salud_maxima
-        self.image = self.animation[self.frame_index]
-        self.rect = self.image.get_rect()  # rectangulo
-        self.rect.center = (x, y)  # centro_rectangulo
-        self.width = self.image.get_width()  # ancho
-        self.height = self.image.get_height()  # alto
-        self.direction = 1  # O cualquier otro valor inicial que desees
-        self.action = 0  # 0: idle, 1: run
-        self.ammo = 5000  # Agrega el atributo ammo específico de Enemy
-        self.max_ammo = 5000
-
-
-        self.move_counter = 0  # contador_movimiento
-        self.vision = pygame.Rect(0, 0, 150, 20)  # vision
-        self.idling = False  # inactividad
-        self.idling_counter = 0  # contador_inactividad
+    def __init__(self, x, y, velocidad, imagen_dict_ruta):
+        super().__init__(x, y, velocidad)
+        self.quieto_derecha = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["idle"], 1, 4, False)
+        self.quieto_izquierda = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["idle"], 1, 4, True) 
+        self.correr_derecha = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["run"], 1, 5)
+        self.correr_izquierda = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["run"], 1, 5, True)
+        self.saltar_derecha = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["jum"], 0, 1, False, 2)
+        self.saltar_izquierda = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["jum"], 0, 1, True, 2)
+        self.muerte_derecha = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["death"], 0, 1, False, 2)
+        self.muerte_izquierda = Auxiliar.getSurfaceFromSeparateFiles(imagen_dict_ruta["death"], 0, 1, True, 2)
+        self.indice_frame = 0
+        self.animacion = self.quieto_derecha
+        self.salud_maxima = self.salud
+        self.image = self.animacion[self.indice_frame]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.ancho = self.image.get_width()
+        self.altura = self.image.get_height()
+        self.direccion = 1
+        self.accion = 0  
+        self.municion = 5000
+        self.municion_maxima = 5000
+        self.contador_movimiento = 0
+        self.vision = pygame.Rect(0, 0, 150, 20)
+        self.inactivo = False
+        self.contador_inactividad = 0
 
 
     def update(self,screen_scroll,player, bullet_group, shot_fx):
@@ -41,37 +38,42 @@ class Enemy(Character):
         self.ai(player,bullet_group,shot_fx)  # inteligencia_artificial
         # desplazar
         self.rect.x += screen_scroll
-    def move(self, direction):
-        if direction == "left":
-            self.x -= self.speed
-        elif direction == "right":
-            self.x += self.speed
-    def ai(self, player, bullet_group, shot_fx):
-        if self.alive and player.alive:
-            if not self.idling and random.randint(1, 200) == 1:
-                self.update_action(0)  # 0: idle
-                self.idling = True
-                self.idling_counter = 50
+            # Reducir el tiempo de espera para el próximo disparo
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+    def move(self, movi_der, movi_izq):
+        if movi_der:
+            self.rect.x -= self.speed
+        elif movi_izq:
+            self.rect.x += self.speed
 
-            if self.vision.colliderect(player.rect):
+    def ai(self, player, grupo_balas, sonido_disparo):
+        if self.alive and player.alive:
+            if not self.inactivo and random.randint(1, 200) == 1:
                 self.update_action(0)  # 0: idle
-                self.shoot(bullet_group, shot_fx)  # Llamada al método shoot() con los argumentos requeridos
+                self.inactivo = True
+                self.contador_inactividad = 50
+
+            # Comprueba si el enemigo está cerca del jugador
+            if self.vision.colliderect(player.rect):
+                # Detén el movimiento y enfrenta al jugador
+                self.move(movi_der=False, movi_izq=False)  # Detén el movimiento (no muevas a izquierda ni derecha)
+                self.update_action(0)  # 0: idle
+                self.shoot(grupo_balas, sonido_disparo)
             else:
-                if not self.idling:
-                    direction = "right" if self.direction == 1 else "left"
-                    self.move(direction)
+                if not self.inactivo:
+                    ai_movimiento_derecha = self.direction == 1
+                    ai_moving_left = not ai_movimiento_derecha
+                    self.move(movi_der=ai_moving_left, movi_izq=ai_movimiento_derecha)
                     self.update_action(1)  # 1: run
-                    self.move_counter += 1
+                    self.contador_movimiento += 1
+                    # Actualiza la visión del enemigo mientras se mueve
                     self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
 
-                    if self.move_counter > TILE_SIZE:
+                    if self.contador_movimiento > TILE_SIZE:
                         self.direction *= -1
-                        self.move_counter *= -1
+                        self.contador_movimiento *= -1
                 else:
-                    self.idling_counter -= 1
-                    if self.idling_counter <= 0:
-                        self.idling = False
-
-
-
-
+                    self.contador_inactividad -= 1
+                    if self.contador_inactividad <= 0:
+                        self.inactivo = False

@@ -135,6 +135,7 @@ class World():
         self.obstacle_list = []
         self.world_data = []
         self.img_list = []
+        self.level_length = 0
         for x in range(TILE_TYPES):
             img = pygame.image.load(f'img/tile/{x}.png')
             img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
@@ -171,14 +172,15 @@ class World():
                     #     decoration = Decoration(
                     #         img, x * TILE_SIZE, y * TILE_SIZE)
                     #     decoration_group.add(decoration)
+
                     elif tile == 15:
                        player = Player( x * TILE_SIZE, y * TILE_SIZE, speed=5, ammo=100, grenades=4, imge_dict=image_dict["image_dict_playe"])
 
                         # health_bar = HealthBar(10, 10, player.health, player.health, animation_list)
                     elif tile == 16:
-                        enemy = Enemy( x * TILE_SIZE, y * TILE_SIZE, speed=5,
-                                      imge_dict=image_dict["image_dict_enemi"])
-
+                        enemy = Enemy( x * TILE_SIZE, y * TILE_SIZE, velocidad=5,
+                                      imagen_dict_ruta=image_dict["image_dict_enemi"])
+                        
                     # elif tile == 17:
                         #     item_box = ItemBox('Ammo', x * TILE_SIZE, y * TILE_SIZE, item_boxes)
                         #     item_box_group.add(item_box)
@@ -222,9 +224,17 @@ class World():
 
 
 
-    def draw(self, screen,displacement):
+    def draw(self, screen,screen_scroll):
         for platform in self.obstacle_list:
-            platform.update(screen,displacement)
+            platform.update(screen,screen_scroll)
+
+
+
+
+
+
+
+
 
 
 
