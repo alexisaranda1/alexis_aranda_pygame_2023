@@ -14,7 +14,7 @@ pygame.init()
 
 
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 pygame.display.set_caption('Shooter')
 
 #set framerate
@@ -22,8 +22,8 @@ clock = pygame.time.Clock()
 FPS = 60
 
 
-screen_scroll = 0
-bg_scroll = 0
+desplazamiento_pantalla  = 0
+desplazamiento_fondo  = 0
 level = 1
 start_game = False
 start_intro = False
@@ -86,13 +86,13 @@ def draw_text(text, font, text_col, x, y):
 
 
 def draw_bg():
-	screen.fill(BG)
+	screen.fill(VERDE)
 	width = sky_img.get_width()
 	for x in range(5):
-		screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
-		screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
-		screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
-		screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height()))
+		screen.blit(sky_img, ((x * width) - desplazamiento_fondo  * 0.5, 0))
+		screen.blit(mountain_img, ((x * width) - desplazamiento_fondo  * 0.6, ALTO_PANTALLA - mountain_img.get_height() - 300))
+		screen.blit(pine1_img, ((x * width) - desplazamiento_fondo  * 0.7, ALTO_PANTALLA - pine1_img.get_height() - 150))
+		screen.blit(pine2_img, ((x * width) - desplazamiento_fondo  * 0.8, ALTO_PANTALLA - pine2_img.get_height()))
 
 
 #function to reset level
@@ -108,21 +108,21 @@ def reset_level():
 
 	#create empty tile list
 	data = []
-	for row in range(ROWS):
-		r = [-1] * COLS
+	for row in range(FILAS):
+		r = [-1] * COLUMNAS
 		data.append(r)
 
 	return data
 
 #create screen fades
 intro_fade = ScreenFade(1, BLACK, 4)
-death_fade = ScreenFade(2, PINK, 4)
+death_fade = ScreenFade(2, ROSA, 4)
 
 #create buttons
 # El código anterior está creando tres botones en un programa de Python.
-start_button = shoter_button.Button(SCREEN_WIDTH // 2 - 130, SCREEN_HEIGHT // 2 - 150, start_img, 1)
-exit_button = shoter_button.Button(SCREEN_WIDTH // 2 - 110, SCREEN_HEIGHT // 2 + 50, exit_img, 1)
-restart_button = shoter_button.Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, restart_img, 2)
+start_button = shoter_button.Button(ANCHO_PANTALLA // 2 - 130, ALTO_PANTALLA // 2 - 150, start_img, 1)
+exit_button = shoter_button.Button(ANCHO_PANTALLA // 2 - 110, ALTO_PANTALLA // 2 + 50, exit_img, 1)
+restart_button = shoter_button.Button(ANCHO_PANTALLA // 2 - 100, ALTO_PANTALLA // 2 - 50, restart_img, 2)
 
 #create sprite groups
 # El código anterior está creando varios grupos de sprites en un juego usando la biblioteca Pygame.
@@ -146,7 +146,7 @@ while run:
 
 	if start_game == False:
 		#draw menu
-		screen.fill(BG)
+		screen.fill(VERDE)
 		#add buttons
 		if start_button.draw(screen):
 			start_game = True
@@ -159,13 +159,13 @@ while run:
 		#draw world map
 		world.draw()
 		#show player health
-		health_bar.draw(player.health)
+		health_bar.draw(player.salud)
 		#show ammo
-		draw_text('AMMO: ', font, WHITE, 10, 35)
+		draw_text('AMMO: ', font, BLANCO, 10, 35)
 		for x in range(player.ammo):
 			screen.blit(bullet_img, (90 + (x * 10), 40))
 		#show grenades
-		draw_text('GRENADES: ', font, WHITE, 10, 60)
+		draw_text('GRENADES: ', font, BLANCO, 10, 60)
 		for x in range(player.grenades):
 			screen.blit(grenade_img, (135 + (x * 15), 60))
 
@@ -202,14 +202,14 @@ while run:
 
 
 		#update player actions
-		if player.alive:
+		if player.vivo:
 			#shoot bullets
 			if shoot:
 				player.shoot()
 			#throw grenades
 			elif grenade and grenade_thrown == False and player.grenades > 0:
-				grenade = Grenade(player.rect.centerx + (0.5 * player.rect.size[0] * player.direction),\
-				 			player.rect.top, player.direction)
+				grenade = Grenade(player.rect.centerx + (0.5 * player.rect.size[0] * player.direccion),\
+				 			player.rect.top, player.direccion)
 				grenade_group.add(grenade)
 				#reduce grenades
 				player.grenades -= 1
@@ -220,15 +220,15 @@ while run:
 				player.update_action(1)#1: run
 			else:
 				player.update_action(0)#0: idle
-			screen_scroll, level_complete = player.move(moving_left, moving_right)
-			bg_scroll -= screen_scroll
+			desplazamiento_pantalla , level_complete = player.move(moving_left, moving_right)
+			desplazamiento_fondo  -= desplazamiento_pantalla 
 			#check if player has completed the level
 			if level_complete:
 				start_intro = True
 				level += 1
-				bg_scroll = 0
+				desplazamiento_fondo  = 0
 				world_data = reset_level()
-				if level <= MAX_LEVELS:
+				if level <= MAXIMO_NIVELES:
 					#load in level data and create world
 					with open(f'level{level}_data.csv', newline='') as csvfile:
 						reader = csv.reader(csvfile, delimiter=',')
@@ -238,12 +238,12 @@ while run:
 					world = World()
 					player, health_bar = world.process_data(world_data)	
 		else:
-			screen_scroll = 0
+			desplazamiento_pantalla  = 0
 			if death_fade.fade():
 				if restart_button.draw(screen):
 					death_fade.fade_counter = 0
 					start_intro = True
-					bg_scroll = 0
+					desplazamiento_fondo  = 0
 					world_data = reset_level()
 					#load in level data and create world
 					with open(f'level{level}_data.csv', newline='') as csvfile:
