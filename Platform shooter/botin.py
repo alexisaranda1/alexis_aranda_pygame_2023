@@ -11,6 +11,7 @@ class ItemBox(pygame.sprite.Sprite):
     def __init__(self, item_type, x, y,nivel= False):
         pygame.sprite.Sprite.__init__(self)
         self.nivel = nivel
+        self.terminar_nivel = False
         self.item_type = item_type
         self.image = ItemBox.item_boxes[self.item_type]
         self.rect = self.image.get_rect()
@@ -27,9 +28,17 @@ class ItemBox(pygame.sprite.Sprite):
                     player.municion = 10 
             elif self.item_type == 'Exit':
                 crear_bandera(f"bandera_{self.nivel}","true") 
+                self.terminar_nivel = True
             self.kill()
-
-
+            
     def draw(self, pantalla):
-        pantalla.blit(self.image, self.rect)
+        print(self.terminar_nivel)
+        if self.terminar_nivel:
+            print(self.terminar_nivel)
+            imagen = pygame.image.load(r'menu_1\win.jpg')
+            pantalla.blit(imagen, (0, 0))
+        else:
+            pantalla.blit(self.image,(self.rect))
+          
+
 

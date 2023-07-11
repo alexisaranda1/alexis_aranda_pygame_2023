@@ -5,7 +5,7 @@ from constantes import *
 class Background:
     def __init__(self, background_image):
         self.image = pygame.image.load(background_image).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (ANCHO_PANTALLA, ALTO_PANTALLA))
+        #self.image = pygame.transform.scale(self.image, (ANCHO_PANTALLA, ALTO_PANTALLA))
         self.posicion_x = 0
         self.factor_velocidad = FACTOR_VELOCIDAD
         self.pantalla= pygame.display.get_surface()
@@ -20,12 +20,12 @@ class Background:
         dx = nivel_actual.player.vel_x  # Actualizar dx con la velocidad horizontal del jugador
         if nivel_actual.player.rect.right > ANCHO_PANTALLA - LIMITE_DESPLAZAMIENTO and self.posicion_x < (nivel_actual.nivel_len * TAMAÑO_BLOQUES) - ANCHO_PANTALLA:
             screen_scroll = -dx
-            print(screen_scroll)
+         
         elif nivel_actual.player.rect.left < LIMITE_DESPLAZAMIENTO and self.posicion_x > abs(dx):
             screen_scroll = -dx 
         return screen_scroll 
     
     def move_background(self, screen_scroll):
-        self.factor_velocidad = screen_scroll * FACTOR_VELOCIDAD
+        self.factor_velocidad = screen_scroll *FACTOR_VELOCIDAD
         self.posicion_x +=self.factor_velocidad
 

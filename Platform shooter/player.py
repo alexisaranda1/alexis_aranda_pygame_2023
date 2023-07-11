@@ -1,6 +1,6 @@
 import pygame
 from auxiliar import Auxiliar
-from character import Character
+from character import *
 from constantes import *
 class Player(Character): # jugador
     def __init__(self, x, y, velocidad, municion, granadas,imagen_dict_ruta):
@@ -22,22 +22,21 @@ class Player(Character): # jugador
         self.image = self.animacion[self.indice_frame]
         self.rect = self.image.get_rect()  
         self.rect.center = (x, y)
-        # Achicar el rectángulo del jugador
         self.rect.width -= 5 
-        #self.rect.height -= 5 
         self.ancho = self.image.get_width()  
         self.alto = self.image.get_height()  
-        self.scoree = 0
         self.municion = municion  
         self.municion_inicial = municion 
         self.enfriamiento_disparo = 0  
         self.granadas = granadas  # granadas
         self.movimiento_izquierdo = False
         self.movimiento_derecha = False
+        self.diparar = False
         self.en_suelo = False
         self.player = True
-        self.saltar = False  # saltar
-        self.en_aire = False  # en_aire  
+        self.saltar = False
+        self.en_aire = False 
+        self.scoree = 0
         
     def jum(self):
         if self.saltar  and self.en_suelo:
@@ -60,36 +59,28 @@ class Player(Character): # jugador
             self.indice_frame = 0
             self.direccion = 1
     def handle_key_events(self, lista_event,grupo_balas,sonido_disparo):
-           for event in lista_event:
+      
+        for event in lista_event:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.movimiento_izquierdo = True
-                    self.update_action(1)  # Actualizar la acción a "Correr hacia la izquierda"
                 elif event.key == pygame.K_d:
                     self.movimiento_derecha = True
-                    self.update_action(1)  # Actualizar la acción a "Correr hacia la derecha"
                 elif event.key == pygame.K_SPACE:
-                    self.shoot(grupo_balas, sonido_disparo) 
-                elif event.key == pygame.K_q:
-                    self.granadas = True
+                    print(self.scoree)
+                    self.shoot(grupo_balas, sonido_disparo)
                 elif event.key == pygame.K_w and self.vivo:
                     self.saltar = True
-                    self.update_action(2)  # Actualizar la acción a "Saltar"
-                else:
-                    self.update_action(0) 
+
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     self.movimiento_izquierdo = False   
                 elif event.key == pygame.K_d:
                     self.movimiento_derecha = False
-                elif event.key == pygame.K_SPACE:
-                    #self.shoot = False
-                    pass
-                elif event.key == pygame.K_q:
-                    self.granadas = False
-                    self.granada_lanzada = False
                 elif event.key == pygame.K_w and self.vivo:
                     self.saltar = False
+         
+   
                        
     def update_position(self, desplazamiento_pantalla):
         self.rect.x += desplazamiento_pantalla
@@ -98,6 +89,8 @@ class Player(Character): # jugador
             self.rect.left = 0
         elif self.rect.right > ANCHO_PANTALLA:
             self.rect.right = ANCHO_PANTALLA
+        elif self.rect.y > ALTO_PANTALLA:
+            self.salud = 0
             
     def update(self):
         super().update()
@@ -107,9 +100,7 @@ class Player(Character): # jugador
         self.move_left()
         self.move_right()
         self.check_alive()
-        self.respawn()
-        
-      
+       
         self.update_animation_player()
        
     def update_animation_player(self):
@@ -149,17 +140,11 @@ class Player(Character): # jugador
         if self.salud <= 0:
             self.salud = 0
 
+    def shooting(self, grupo_balas, shot_fx):
+            bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+            bullet = Bullet(self.rect.centerx + (0.75 * self.rect.size[0] * self.direccion), self.rect.centery, self.direccion, bullet_img)
+            grupo_balas.add(bullet)
+            print("esta disparando")
+            self.municion -= 1
+            shot_fx.play()
 
-    def respawn(self):
-        if not self.vivo:
-         
-            self.rect.x = self.posicion_inicial_x 
-            self.rect.y = self.posicion_inicial_y 
-            self.salud = self.salud_maxima 
-            self.vivo = True
-            self.movimiento_izquierdo = False  
-            self.movimiento_derecha = False 
-
-            self.en_suelo = False
-            self.saltar = False
-            self.en_aire = False

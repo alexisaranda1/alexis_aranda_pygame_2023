@@ -27,7 +27,7 @@ imagen_dict = {
 }
 
 
-level = 1
+level = 3
 nivel_actual = World()
 nivel_actual.process_data(imagen_dict,level)
 run = True

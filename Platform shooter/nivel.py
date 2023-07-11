@@ -12,6 +12,7 @@ from class_chronometer import Chronometer
 from class_trampa import Trampa
 from class_decoration import Decoration
 from class_healthBar import HealthBar
+import json
 
 class World():
     def __init__(self):
@@ -23,9 +24,10 @@ class World():
         self.datos_nivel = []
         self.amagen_list = []
         self.nivel_len = 0
+        self.bandera_nivel = 0
         self.player = None
         self.barra_salud = None
-        self.cronometro = Chronometer(tiempo_inicial=60)
+        self.cronometro = Chronometer(tiempo_inicial=150)
         self.item_box_group = pygame.sprite.Group()
         self.trampa_group = pygame.sprite.Group()
         self.grupo_decoracion = pygame.sprite.Group()
@@ -34,6 +36,7 @@ class World():
         self.grupo_enemigos = pygame.sprite.Group()
         self.grupo_balas = pygame.sprite.Group()
         self.exit_group = pygame.sprite.Group()
+        self.dic_data = {}
         for x in range(CANTIDAD_BLOQUES):
             image = pygame.image.load(f'img/tile/{x}.png')
             image = pygame.transform.scale(image, (TAMAÑO_BLOQUES, TAMAÑO_BLOQUES))
@@ -41,6 +44,7 @@ class World():
 
     def load_level_data(self, nivel):
         # Create empty tile list
+        self.bandera_nivel = nivel
         self.datos_nivel = []
         for fila in range(FILAS):
             r = [-1] * COLUMNAS
@@ -100,22 +104,37 @@ class World():
         self.item_box_group.update(self.desplazamiento_pantalla,self.player)
         self.grupo_balas.update(self, self.player, self.grupo_enemigos, self.grupo_balas)
         self.grupo_enemigos.update(self.desplazamiento_pantalla , self.player,self.grupo_balas,self.sonido_disparo)
-
         self.cronometro.actualizar()
+
     def draw(self, pantalla):
-     
-        self.fondo.draw(pantalla,self.desplazamiento_pantalla)
-        
-        self.trampa_group.draw(pantalla)
-        self.grupo_decoracion.draw(pantalla)
-        self.item_box_group.draw(pantalla)  
-        self.grupo_balas.draw(pantalla) 
-        self.grupo_enemigos.draw(pantalla) 
-        self.barra_salud.draw(self.player.salud,pantalla)
-        self.draw_ammo(self.player,pantalla)
-        self.platform_group.update(pantalla,self.desplazamiento_pantalla)
-        self.player.draw(pantalla)
-        self.cronometro.mostrar_tiempo(pantalla)
+
+        bandera = leer_bandera(f"bandera_{self.bandera_nivel}")
+        if not self.player.vivo or self.cronometro.tiempo_desendente <= 0 :
+            imagen = pygame.image.load(r'menu_1\game_over.jpg')
+            imagen_escalada = pygame.transform.scale(imagen, (1000, 600))
+            pantalla.blit(imagen_escalada, (0, 0))
+
+        elif bandera[0] == "true":
+            self.guardar_partida()
+            imagen = pygame.image.load(r'menu_1\win.jpg')
+            imagen_escalada = pygame.transform.scale(imagen, (1000, 600))
+            pantalla.blit(imagen_escalada, (0, 0))
+
+        else:
+            self.fondo.draw(pantalla,self.desplazamiento_pantalla)
+            self.trampa_group.draw(pantalla)
+            self.grupo_decoracion.draw(pantalla)
+            self.item_box_group.draw(pantalla)  
+            self.grupo_balas.draw(pantalla) 
+            self.grupo_enemigos.draw(pantalla) 
+            self.barra_salud.draw(self.player.salud,pantalla)
+            self.draw_ammo(self.player,pantalla)
+            self.platform_group.update(pantalla,self.desplazamiento_pantalla)
+            self.player.draw(pantalla)
+            self.cronometro.mostrar_tiempo(pantalla)
+
+
+
     def draw_ammo(self, player,pantalla):
         imagen_balas = pygame.image.load('img/tile/17.png')
         imagen_balas = pygame.transform.scale(imagen_balas, (TAMAÑO_IMAGEN_BALAS, TAMAÑO_IMAGEN_BALAS))
@@ -164,3 +183,16 @@ class World():
         if collision_list:
             character.vel_y = 0  # Detener el movimiento vertical si hubo colisión
         character.y = character.rect.y  # Actualizar la posición y del personaje
+
+        # GUARDAR EN TXT
+    def guardar_partida(self):
+        '''
+        Brief: Guarda en un archivio la ultima puntucion del jugado
+
+        Parameters:
+            self -> Instancia de la clase   
+        '''
+        with open("score.txt","w") as archivo:
+            archivo.write(str(self.player.scoree))
+
+            

@@ -18,10 +18,10 @@ PANTALLA = pygame.display.set_mode((ANCHO_PANTALLA,ALTO_PANTALLA))
 imagen_fondo = pygame.image.load(r"menu_1\fondo_menu.jpg")
 
 imagen_fondo = pygame.transform.scale(imagen_fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
-# Crea el formulario con los valores calculados
+
 form_prueba = FormPrueba(PANTALLA, 0, 0, ANCHO_PANTALLA, ALTO_PANTALLA, imagen_fondo, (171, 1, 1))
 
-pausa = pygame.image.load(r"API_FORMS\Menu\9.png")
+pausa = pygame.image.load(r"menu_1\8-bitpause.jpg")
 pausa = pygame.transform.scale(pausa,(500,500))
 
 is_paused = False
@@ -35,7 +35,7 @@ while flag:
             pygame.quit()
             sys.exit(0)
         elif evento.type == pygame.KEYDOWN:
-           if evento.key == pygame.K_TAB:
+           if evento.key == pygame.K_ESCAPE:
                 is_paused = not is_paused
             
     PANTALLA.fill("Black")
@@ -43,9 +43,8 @@ while flag:
     if not is_paused:
         form_prueba.update(lista_eventos)
     else:
-        # Mostrar mensaje de pausa
-        PANTALLA.blit(pausa, (200,100))
-    
+        PANTALLA.blit(pausa, (200,100))   
+
     pygame.display.update()
 
 

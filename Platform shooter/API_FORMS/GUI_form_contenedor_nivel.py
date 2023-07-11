@@ -21,12 +21,12 @@ class FormContenedorNivel(Form):
                                       h=50,
                                       onclick=self.btn_home_click,
                                       onclick_param="",
-                                      path_image=r"menu_1\Boton_inicio.png")
+                                      path_image=r"API_FORMS\home.png")
         
         dic = [{"clave": "pepe","punot":"cdcd"}]
 
         self.form_jugar = FormFin(self._master,690,205,500,550,(220,0,220),
-                                 "white",True,r"API_FORMS\Menu\0.png",
+                                 "white",True,r"API_FORMS\home.png",
                                  dic,100,10,10)
         
         self.lista_widgets.append(self._btn_home)

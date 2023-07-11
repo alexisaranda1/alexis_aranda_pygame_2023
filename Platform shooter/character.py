@@ -22,7 +22,8 @@ class Character(pygame.sprite.Sprite): # personaje
         self.indice_frame = 0
         self.animacion = [] 
         self.direccion = 1
-        self.accion = 0  
+        self.accion = 0
+
     def update_action(self, nueva_accion):
         if nueva_accion != self.accion:
             self.accion = nueva_accion
@@ -34,6 +35,10 @@ class Character(pygame.sprite.Sprite): # personaje
     def draw(self, screen):
         self.image = self.animacion[self.indice_frame]
         screen.blit(self.image, self.rect)
+        if self.scoree is not None:
+            fuente = pygame.font.Font(None, 50)
+            score_texto = fuente.render(f"score: {self.scoree}", False, BLANCO)
+            screen.blit(score_texto, (600, 6))
         if DEBUG:
             player_rect = pygame.Rect(self.rect.x, self.rect.y, self.rect.width, self.rect.height)
             pygame.draw.rect(screen, ROJO, player_rect)
@@ -48,11 +53,12 @@ class Character(pygame.sprite.Sprite): # personaje
             self.update_action(3)    
     def shoot(self, grupo_balas, shot_fx):
         
-        if self.enfriamiento_disparo == 0 and self.municion > 0:
+        if  self.municion > 0:
             self.enfriamiento_disparo = 20
             bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
             bullet = Bullet(self.rect.centerx + (0.75 * self.rect.size[0] * self.direccion), self.rect.centery, self.direccion, bullet_img)
             grupo_balas.add(bullet)
+            print("esta disparando")
             self.municion -= 1
             shot_fx.play()
 

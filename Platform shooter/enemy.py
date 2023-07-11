@@ -24,7 +24,8 @@ class Enemy(Character):
         self.ancho = self.image.get_width()
         self.altura = self.image.get_height()
         self.direccion = 1
-        self.accion = 0  
+        self.accion = 0
+        
         self.municion = 5000
         self.municion_maxima = 5000
         self.contador_movimiento = 0
@@ -55,27 +56,27 @@ class Enemy(Character):
     def ai(self, player, grupo_balas, sonido_disparo):
         if self.vivo and player.vivo:
             if not self.inactivo and random.randint(1, 200) == 1:
-                self.update_action(0)  # 0: idle
+                self.update_action(0) 
                 self.inactivo = True
                 self.contador_inactividad = 50
 
-            # Comprueba si el enemigo está cerca del jugador
             if self.vision.colliderect(player.rect):
-                # Detén el movimiento y enfrenta al jugador
-                self.move()  # Detén el movimiento (no muevas a izquierda ni derecha)
-                self.update_action(0)  # 0: idle
-                self.shoot(grupo_balas, sonido_disparo)
+                self.move() 
+                self.update_action(0)
+                if self.enfriamiento_disparo == 0 :
+                    self.enfriamiento_disparo = 20
+                    self.shoot(grupo_balas, sonido_disparo)
             else:
                 if not self.inactivo:
                     ai_movimiento_derecha = self.direccion == 1
                     if ai_movimiento_derecha:
-                        self.move(1)  # Mover a la derecha
+                        self.move(1)  
                     else:
-                        self.move(2)  # Mover a la izquierda
+                        self.move(2) 
 
-                    self.update_action(1)  # 1: run
+                    self.update_action(1) 
                     self.contador_movimiento += 1
-                    # Actualiza la visión del enemigo mientras se mueve
+                  
                     self.vision.center = (self.rect.centerx + 75 * self.direccion, self.rect.centery)
 
                     if self.contador_movimiento > TAMAÑO_BLOQUES:

@@ -30,11 +30,9 @@ class FormPrueba(Form):
       
         self.txtbox = TextBox(self._slave,x,y,350,150,160,50,(70,59,59),"White","Black",(70,59,59),2,font= "Comic Sans",font_size=15,font_color="Black")
       
-        #self.btn_jugar = Button_Image(self._slave,x,y,400,220,60,60,r"menu_1\boton_start.png",self.btn_jugar_click,"a")
+      
         self.btn_jugar = Button(self._slave,x,y,350,220,100,60,(70,59,59),"Blue",self.btn_jugar_click,"Nombre","START",font="Verdana",font_size=15,font_color="White")
-        
-        #self.btn_tabla = Button_Image(self._slave,x,y,400,320,60,60,r"menu_1\boton_ranking.png",self.btn_tabla_click,"lala")
-        
+
         self.btn_tabla =Button(self._slave,x,y,350,320,100,60,(70,59,59),"Blue",self.btn_tabla_click,"Nombre","RANKING",font="Verdana",font_size=15,font_color="White")
         
         self.btn_play = Button(self._slave,x,y,350,410,160,60,(70,59,59),"Blue",self.btn_play_click,"Nombre","Pause music",font="Verdana",font_size=15,font_color="White")
@@ -112,6 +110,8 @@ class FormPrueba(Form):
     def btn_jugar_click(self,param):
         nombre = self.txtbox.get_text()
 
+        
+
         if len(nombre) > 0:
             form_jugar = FormMenuPlay(screen=self._master,
                                     x= self._master.get_width() / 2 - 250,
@@ -121,9 +121,9 @@ class FormPrueba(Form):
                                     color_background= (220,0,220),
                                     color_border= (255,255,255),
                                     active= True,
-                                    path_image= r"API_FORMS\Menu\0.png")
+                                    path_image= r"menu_1\levels.png")
             
-            print("Jugar")
+
             crear_bandera("bandera_1","false")
             crear_bandera("bandera_2","false")
             crear_bandera("bandera_3","false")
@@ -131,58 +131,63 @@ class FormPrueba(Form):
             self.show_dialog(form_jugar)
         # CREAMOS BD
         if self.flag_sql == True:
+
             with sqlite3.connect("mi_base_de_datos.db") as conexion:
                 # CREAR TABLA--------------------------
                 try:
-                    sentencia = 'create table Ranking (nombre text,score integer)'
-
+                    sentencia = 'CREATE TABLE Ranking (nombre text, score integer)'
                     conexion.execute(sentencia)
                     print("Tabla creada")
 
                 except Exception as e:
                     print(f"Error en Base de datos {e}")
+
+
             self.flag_sql = False
 
     def btn_tabla_click(self,texto):
        # dic_score = [{"jugador" : f"{self.txtbox.get_text()}","Score":f"{slice}"},]
         
-        nombre = self.txtbox.get_text()
-        ultimo_score = []
+        nombre = self.txtbox.get_text() # insert nombre
+        ultimo_score = [] # puntaje
         
         # ACCEDO AL ULTIMO SCORE
         archivo = open("score.txt","r")
         for linea in archivo:
             ultimo_score.append(linea)
-        
         archivo.close()  
             
-    
+       
         # INSERTO EN BD
         with sqlite3.connect("mi_base_de_datos.db") as conexion:
+            print("Conexión a la base de datos establecida")
             try:
+                print("entre",nombre,ultimo_score[0])
                 sentencia = ' insert into Ranking (nombre, score) values(?,?)'
+                conexion.execute(sentencia, (nombre, ultimo_score[0]))
+                conexion.commit()
+                print("Sentencia ejecutada correctamente")  # Agrega esta línea para verificar la ejecución
 
-                conexion.execute(sentencia,(nombre,ultimo_score[0]))
 
             except Exception as e:
                 print(f"Error en Base de datos {e}")
+
 
         dic_score = []
 
         with sqlite3.connect("mi_base_de_datos.db") as conexion:
             try:
-                
+              
                 sentencia = '''
                             select * from Ranking order by score desc limit 3
                             '''
                 cursor = conexion.execute(sentencia)
                 for fila in cursor:
-
+                    print("select")
                     dic_score.append({"jugador" : f"{fila[0]}","Score":f"{fila[1]}"},)
-
                 print("Tabla creada")
             except Exception as e:
                 print(f"Error en Base de datos {e}")
-   
-        form_puntaje = FormMenuScore(self._master,690,205,500,550,(220,0,220),"white",True,r"API_FORMS\Menu\0.png",dic_score,100,10,10)
+
+        form_puntaje = FormMenuScore(self._master,300,50,500,500,(220,0,220),"white",True,r"API_FORMS\Window.png",dic_score,100,10,10)
         self.show_dialog(form_puntaje)
