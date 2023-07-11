@@ -47,6 +47,7 @@ class Character(pygame.sprite.Sprite): # personaje
             self.vivo = False
             self.update_action(3)    
     def shoot(self, grupo_balas, shot_fx):
+        
         if self.enfriamiento_disparo == 0 and self.municion > 0:
             self.enfriamiento_disparo = 20
             bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()

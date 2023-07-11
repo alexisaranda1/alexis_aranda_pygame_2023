@@ -7,13 +7,14 @@ class Manejador_niveles:
     def __init__(self, pantalla) -> None:
         self._slave = pantalla # pantalla juego
         self.nivel = World()
+        self.nivel = None
         self.nivel_uno = None  
        
     def get_nivel_1(self):
          #carga de rutas
         imagen_dict = {
         "image_dict_playe": {
-            "idle": "img/player/Idle/{0}.png",
+            "idle": "img\player\Idle\{0}.png",
             "run": "img/player/Run/{0}.png",
             "jum": "img/player/Jump/{0}.png",
             "death": "img/player/Death/{0}.png"
@@ -27,6 +28,7 @@ class Manejador_niveles:
     }
 
         nivel = 1
+        self.nivel = World()
         self.nivel.process_data(imagen_dict, nivel)
         return self.nivel
 
@@ -34,7 +36,7 @@ class Manejador_niveles:
             #carga de rutas
         imagen_dict = {
         "image_dict_playe": {
-            "idle": "img/player/Idle/{0}.png",
+            "idle": "img\player\Idle\{0}.png",
             "run": "img/player/Run/{0}.png",
             "jum": "img/player/Jump/{0}.png",
             "death": "img/player/Death/{0}.png"
@@ -47,6 +49,7 @@ class Manejador_niveles:
         }
     }
         nivel = 2
+        self.nivel = World()
         self.nivel.process_data(imagen_dict, nivel)
         return self.nivel
 
@@ -67,6 +70,7 @@ class Manejador_niveles:
         }
         }
         nivel = 3
+        self.nivel = World()
         self.nivel.process_data(imagen_dict, nivel)
         return self.nivel
 

@@ -2,6 +2,10 @@ import pygame
 from pygame.locals import *
 from API_FORMS.GUI_widget import *
 
+# La clase Button es una subclase de Widget que representa 
+# un botón en el que se puede hacer clic con
+# texto y opciones de estilo.
+
 class Button(Widget):
     def __init__(self, screen,master_x,master_y, x,y,w,h,color_background,color_border, onclick, onclick_param, text, font, font_size, font_color):
         super().__init__(screen, x,y,w,h,color_background,color_border)
@@ -19,9 +23,7 @@ class Button(Widget):
         self.isclicked = False
         
         self.render()
-        
-        
- 
+
     def render(self):
         image_text = self._font.render(self._text, True, self._font_color, self._color_background)
         

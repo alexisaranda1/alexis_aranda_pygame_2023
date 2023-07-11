@@ -1,14 +1,16 @@
 
 import pygame
 from constantes import *
+from banderas import *
 class ItemBox(pygame.sprite.Sprite):
     item_boxes = {
         'Health': pygame.image.load('img/tile/19.png'),
         'Ammo': pygame.image.load('img/tile/17.png'),
         'Exit': pygame.image.load('img/tile/20.png')
     }
-    def __init__(self, item_type, x, y):
+    def __init__(self, item_type, x, y,nivel= False):
         pygame.sprite.Sprite.__init__(self)
+        self.nivel = nivel
         self.item_type = item_type
         self.image = ItemBox.item_boxes[self.item_type]
         self.rect = self.image.get_rect()
@@ -16,15 +18,15 @@ class ItemBox(pygame.sprite.Sprite):
 
     def update(self, screen_scroll, player):
         self.rect.x += screen_scroll
-
         if pygame.sprite.collide_rect(self, player):
             if self.item_type == 'Health':
-                player.salud += 10  # Increase player's health by 10 (adjust the value as needed)
+                if player.salud < 100:
+                    player.salud += 10  
             elif self.item_type == 'Ammo':
-                player.municion += 10 
+                if player.municion < 10:
+                    player.municion = 10 
             elif self.item_type == 'Exit':
-                
-                pass
+                crear_bandera(f"bandera_{self.nivel}","true") 
             self.kill()
 
 

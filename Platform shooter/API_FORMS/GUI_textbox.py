@@ -8,6 +8,8 @@ FPS = 18
 #solo lo crea en button o en widget
 
     
+# La clase TextBox es una subclase de la clase Widget y representa un cuadro de texto con propiedades
+# personalizables como tamaño, color, fuente y posición.
 class TextBox(Widget):
     def __init__(
             self, screen,master_x,master_y, x,y,w,h,

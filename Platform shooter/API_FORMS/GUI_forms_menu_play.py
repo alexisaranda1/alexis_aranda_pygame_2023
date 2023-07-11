@@ -31,7 +31,7 @@ class FormMenuPlay(Form):
         
         self._btn_home = Button_Image(screen=self._slave,x=400,y=400,master_x=x,master_y=y,
                                          w=50,h=50,onclick=self.btn_home_click,
-                                         onclick_param="",path_image=r"API_FORMS\Moneda_vida\2.png")
+                                         onclick_param="",path_image=r"menu_1\Boton_inicio.png")
     
     
         self.lista_widgets.append(self._btn_level_1)
@@ -50,11 +50,17 @@ class FormMenuPlay(Form):
         else:
             self.hijo.update(lista_eventos)
 
+
+
+
     def entrar_nivel_1(self,nombre_nivel):
         print("entre nivel")
         nivel = self.manejador_niveles.get_nivel_1()
         form_contenedor_nivel = FormContenedorNivel(self._master,nivel)
         self.show_dialog(form_contenedor_nivel)
+
+
+
 
     def entrar_nivel_2(self,nombre_nivel):
         bandera_1 = leer_bandera("bandera_1")

@@ -1,4 +1,3 @@
-
 import pygame
 from player import Player
 from enemy import Enemy
@@ -30,10 +29,9 @@ imagen_dict = {
 
 level = 1
 nivel_actual = World()
-
 nivel_actual.process_data(imagen_dict,level)
-
 run = True
+
 
 while run: 
     lista_eventos = pygame.event.get()

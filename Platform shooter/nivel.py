@@ -7,99 +7,17 @@ import csv
 from plataforma import Platform
 from botin import ItemBox
 from background import Background
-
-# La clase Agua es un sprite que representa el agua en un juego y se puede
-#  actualizar para moverse con
-# el desplazamiento de la pantalla.
-class Water(pygame.sprite.Sprite):
-    def __init__(self, img, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.midtop = (x + TAMAÑO_BLOQUES // 2, y +
-                            (TAMAÑO_BLOQUES - self.image.get_height()))
-
-    def update(self, screen_scroll):
-        self.rect.x += screen_scroll
-    def draw(self, pantalla):
-        pantalla.blit(self.image, self.rect)
-# La clase `Decoration` es una subclase de `pygame.sprite.Sprite` que representa un objeto de
-# decoración con una imagen, una posición y un método de actualización.
-
-class Decoration(pygame.sprite.Sprite):
-    def __init__(self, img, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.midtop = (x + TAMAÑO_BLOQUES // 2, y + (TAMAÑO_BLOQUES - self.image.get_height()))
-
-    def update(self, screen_scroll):
-        self.rect.x += int(screen_scroll)
-
-    def draw(self, pantalla):
-        pantalla.blit(self.image, self.rect)
-
-# La clase ItemBox es una subclase de pygame.sprite.Sprite que representa
-# una caja que contiene un
-# elemento en un juego, con atributos para el tipo de elemento, la imagen y la posición.
-# La clase HealthBar se usa para crear y dibujar una barra de salud en la pantalla.
-
-class HealthBar():
-    def __init__(self, x, y, salud, salud_maxima):
-        self.x = x
-        self.y = y
-        self.salud = salud
-        self.salud_maxima = salud_maxima
-
-    def draw(self, salud, pantalla):
-        self.salud = salud
-        proporcion_salud = self.salud / self.salud_maxima
-        pygame.draw.rect(pantalla, NEGRO, (self.x - 2, self.y - 2, 154, 24))
-        pygame.draw.rect(pantalla, ROJO, (self.x, self.y, 150, 20))
-        pygame.draw.rect(pantalla, VERDE, (self.x, self.y, 150 * proporcion_salud, 20))
-
-# La clase `World` procesa datos de nivel y dibuja el mundo del juego en la pantalla.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+from banderas import *
+from class_chronometer import Chronometer
+from class_trampa import Trampa
+from class_decoration import Decoration
+from class_healthBar import HealthBar
 
 class World():
     def __init__(self):
         self.platform_group = pygame.sprite.Group()
         self.font =  pygame.font.SysFont('Futura', 30)
         self.fondo =  Background( "img/background/fondo_0.png")
-        self.pantalla =self.fondo.get_screen()
         self.sonido_disparo = pygame.mixer.Sound('audio/shot.wav')
         self.desplazamiento_pantalla  = 0
         self.datos_nivel = []
@@ -107,8 +25,9 @@ class World():
         self.nivel_len = 0
         self.player = None
         self.barra_salud = None
+        self.cronometro = Chronometer(tiempo_inicial=60)
         self.item_box_group = pygame.sprite.Group()
-        self.water_group = pygame.sprite.Group()
+        self.trampa_group = pygame.sprite.Group()
         self.grupo_decoracion = pygame.sprite.Group()
         self.grupo_granada = pygame.sprite.Group()
         self.grupo_player = pygame.sprite.Group()
@@ -143,8 +62,8 @@ class World():
                 if elemento >= 0 and elemento <= 8:
                     self.platform_group.add(Platform(x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES, image))
                 elif elemento >= 9 and elemento <= 10:
-                    water = Water(image, x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES)
-                    self.water_group.add(water)
+                    trampa = Trampa(image, x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES)
+                    self.trampa_group.add(trampa)
                 elif elemento >= 11 and elemento <= 14:
                     decoration = Decoration(image, x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES)
                     self.grupo_decoracion.add(decoration)
@@ -163,26 +82,31 @@ class World():
                     item_box = ItemBox('Health', x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES)
                     self.item_box_group.add(item_box)
                 elif elemento == 20:
-                    item_box = ItemBox('Exit', x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES)
+                    item_box = ItemBox('Exit', x * TAMAÑO_BLOQUES, y * TAMAÑO_BLOQUES,nivel)
                     self.item_box_group.add(item_box)
-  
-    def update(self,lista_evento):
 
+    def update(self,lista_evento):
+        self.player.update_position(self.desplazamiento_pantalla)
         self.player.handle_key_events(lista_evento,self.grupo_balas,self.sonido_disparo)
         self.player.update()
+        self.desplazamiento_pantalla = self.fondo.update_scroll(self)
         self.check_collision(self.grupo_player)
         self.check_collision(self.grupo_enemigos)
-        self.player.update_position(self.desplazamiento_pantalla)
-        self.desplazamiento_pantalla = self.fondo.update_scroll(self)
-        self.water_group.update(self.desplazamiento_pantalla)
+
+
+
+        self.trampa_group.update(self.desplazamiento_pantalla, self.player)
         self.grupo_decoracion.update(self.desplazamiento_pantalla)
         self.item_box_group.update(self.desplazamiento_pantalla,self.player)
         self.grupo_balas.update(self, self.player, self.grupo_enemigos, self.grupo_balas)
         self.grupo_enemigos.update(self.desplazamiento_pantalla , self.player,self.grupo_balas,self.sonido_disparo)
-    
+
+        self.cronometro.actualizar()
     def draw(self, pantalla):
-        self.fondo.draw(self.desplazamiento_pantalla)
-        self.water_group.draw(pantalla)
+     
+        self.fondo.draw(pantalla,self.desplazamiento_pantalla)
+        
+        self.trampa_group.draw(pantalla)
         self.grupo_decoracion.draw(pantalla)
         self.item_box_group.draw(pantalla)  
         self.grupo_balas.draw(pantalla) 
@@ -191,7 +115,7 @@ class World():
         self.draw_ammo(self.player,pantalla)
         self.platform_group.update(pantalla,self.desplazamiento_pantalla)
         self.player.draw(pantalla)
-
+        self.cronometro.mostrar_tiempo(pantalla)
     def draw_ammo(self, player,pantalla):
         imagen_balas = pygame.image.load('img/tile/17.png')
         imagen_balas = pygame.transform.scale(imagen_balas, (TAMAÑO_IMAGEN_BALAS, TAMAÑO_IMAGEN_BALAS))
@@ -240,6 +164,3 @@ class World():
         if collision_list:
             character.vel_y = 0  # Detener el movimiento vertical si hubo colisión
         character.y = character.rect.y  # Actualizar la posición y del personaje
-
-
-

@@ -10,12 +10,11 @@ class Background:
         self.factor_velocidad = FACTOR_VELOCIDAD
         self.pantalla= pygame.display.get_surface()
 
-    def draw(self, screen_scroll):
+    def draw(self,pantalla ,screen_scroll):
         self.move_background(screen_scroll)
-        self.pantalla.fill(VERDE)
-        self.pantalla.blit(self.image, (self.posicion_x, 0))
-    def get_screen(self):
-        return self.pantalla
+        pantalla.fill(VERDE)
+        pantalla.blit(self.image, (self.posicion_x, 0))
+
     def update_scroll(self,nivel_actual):
         screen_scroll = 0
         dx = nivel_actual.player.vel_x  # Actualizar dx con la velocidad horizontal del jugador
@@ -24,7 +23,7 @@ class Background:
             print(screen_scroll)
         elif nivel_actual.player.rect.left < LIMITE_DESPLAZAMIENTO and self.posicion_x > abs(dx):
             screen_scroll = -dx 
-        return screen_scroll *2
+        return screen_scroll 
     
     def move_background(self, screen_scroll):
         self.factor_velocidad = screen_scroll * FACTOR_VELOCIDAD

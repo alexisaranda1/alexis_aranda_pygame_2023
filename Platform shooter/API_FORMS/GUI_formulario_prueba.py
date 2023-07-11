@@ -12,6 +12,7 @@ from API_FORMS.GUI_forms_menu_play import*
 from nivel import*
 import sqlite3
 from banderas import*
+from constantes import *
 
 
 class FormPrueba(Form):
@@ -27,18 +28,22 @@ class FormPrueba(Form):
 
         ############ CONTROLES ######
       
-        self.txtbox = TextBox(self._slave,x,y,320,50,160,50,(70,59,59),"White","Red",(70,59,59),2,font= "Comic Sans",font_size=15,font_color="Black")
+        self.txtbox = TextBox(self._slave,x,y,350,150,160,50,(70,59,59),"White","Black",(70,59,59),2,font= "Comic Sans",font_size=15,font_color="Black")
       
-        self.btn_play = Button(self._slave,x,y,320,310,160,60,(70,59,59),"Blue",self.btn_play_click,"Nombre","Pausa",font="Verdana",font_size=15,font_color="White")
-        self.label_volumen = Label(self._slave, 650, 370, 100, 50 ,"20%","Comic Sans",15,"White",r"API_FORMS\Menu\6.png" )
+        #self.btn_jugar = Button_Image(self._slave,x,y,400,220,60,60,r"menu_1\boton_start.png",self.btn_jugar_click,"a")
+        self.btn_jugar = Button(self._slave,x,y,350,220,100,60,(70,59,59),"Blue",self.btn_jugar_click,"Nombre","START",font="Verdana",font_size=15,font_color="White")
         
-        self.slider_volumen = Slider(self._slave,x,y,100,390,500,15,self.volumen,(70,59,59),"White")
+        #self.btn_tabla = Button_Image(self._slave,x,y,400,320,60,60,r"menu_1\boton_ranking.png",self.btn_tabla_click,"lala")
         
-        self.btn_tabla = Button_Image(self._slave,x,y,365,220,60,60,r"API_FORMS\Menu\0.png",self.btn_tabla_click,"lala")
+        self.btn_tabla =Button(self._slave,x,y,350,320,100,60,(70,59,59),"Blue",self.btn_tabla_click,"Nombre","RANKING",font="Verdana",font_size=15,font_color="White")
+        
+        self.btn_play = Button(self._slave,x,y,350,410,160,60,(70,59,59),"Blue",self.btn_play_click,"Nombre","Pause music",font="Verdana",font_size=15,font_color="White")
+        self.slider_volumen = Slider(self._slave,x,y,200,490,500,15,self.volumen,(70,59,59),"White")
+        self.label_volumen = Label(self._slave, 750, 470, 100, 50 ,"20%","Comic Sans",15,"White",r"menu_1\boton-de-volumen.png" )
         # picture box 
 
        
-        self.btn_jugar = Button_Image(self._slave,x,y,365,120,60,60,r"API_FORMS\Menu\2.png",self.btn_jugar_click,"a")
+       
         
         
         ############
@@ -53,9 +58,8 @@ class FormPrueba(Form):
 
         
 
-        pygame.mixer.music.load(r"API_FORMS\Musica\21_Kombat Temple.mp3")
-        #pygame.mixer.music.set_volume(self.volumen)
-        pygame.mixer.music.set_volume(0.0001)
+        pygame.mixer.music.load(r"menu_1\fondo_menu.mp3")
+        pygame.mixer.music.set_volume(self.volumen)
         pygame.mixer.music.play(-1)
 
         self.render()
@@ -74,7 +78,13 @@ class FormPrueba(Form):
 
 
     def render(self):
-        self._slave.fill(self._color_background)
+        if isinstance(self._color_background, str):
+            self._slave.fill(pygame.Color(self._color_background))
+        else:
+            self._slave.blit(self._color_background, (0, 0))
+            
+        for widget in self.lista_widgets:
+            widget.draw()
 
 
     def btn_play_click(self,texto):
@@ -83,20 +93,20 @@ class FormPrueba(Form):
             pygame.mixer.music.pause()
             self.btn_play._color_background = (105,87,87)
             self.btn_play._font_color = "Red"
-            self.btn_play.set_text("Play")
+            self.btn_play.set_text("Play music")
         else:
             pygame.mixer.music.unpause()
             self.btn_play._color_background = "Red"
             self.btn_play._font_color = "White"
-            self.btn_play.set_text("Pause")
+            self.btn_play.set_text("Pause music")
 
         self.flag_play = not self.flag_play
 
     def upadte_volumen(self,lista_eventos):
         self.volumen = self.slider_volumen.value
         self.label_volumen.set_text(f"{round(self.volumen * 100)}%")
-        #pygame.mixer.music.set_volume(self.volumen)
-        pygame.mixer.music.set_volume(0.001)
+        pygame.mixer.music.set_volume(self.volumen)
+
 
 
     def btn_jugar_click(self,param):
@@ -133,9 +143,6 @@ class FormPrueba(Form):
                     print(f"Error en Base de datos {e}")
             self.flag_sql = False
 
-
-
-
     def btn_tabla_click(self,texto):
        # dic_score = [{"jugador" : f"{self.txtbox.get_text()}","Score":f"{slice}"},]
         
@@ -170,16 +177,12 @@ class FormPrueba(Form):
                             '''
                 cursor = conexion.execute(sentencia)
                 for fila in cursor:
-                    # print(fila)
 
                     dic_score.append({"jugador" : f"{fila[0]}","Score":f"{fila[1]}"},)
-
 
                 print("Tabla creada")
             except Exception as e:
                 print(f"Error en Base de datos {e}")
-        
-        # print("EDU")
    
-        form_puntaje = FormMenuScore(self._master,690,205,500,550,(220,0,220),"white",True,r"Segundo-Parcail-Laboratorio\Menu\0.png",dic_score,100,10,10)
+        form_puntaje = FormMenuScore(self._master,690,205,500,550,(220,0,220),"white",True,r"API_FORMS\Menu\0.png",dic_score,100,10,10)
         self.show_dialog(form_puntaje)
