@@ -15,3 +15,5 @@ class Platform(pygame.sprite.Sprite):
     def draw(self, pantalla):
         pantalla.blit(self.image, self.rect)
 
+
+

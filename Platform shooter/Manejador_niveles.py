@@ -48,6 +48,9 @@ class Manejador_niveles:
             "death": "img/enemy/Death/{0}.png"
         }
     }
+        
+
+        
         nivel = 2
         self.nivel = World()
         self.nivel.process_data(imagen_dict, nivel)
